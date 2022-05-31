@@ -1,0 +1,444 @@
+{
+	"info": {
+		"_postman_id": "62f0eb75-ce87-49a5-9b20-507438aaa3af",
+		"name": "ServeRest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21230006"
+	},
+	"item": [
+		{
+			"name": "Login - sucesso",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"pm.globals.set(\"token\", response.authorization);\r",
+							"\r",
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validar mensagem do body\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Login realizado com sucesso\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"fulano@qa.com\",\r\n  \"password\": \"teste\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/login",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login - E-mail e/ou senha inválidos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"pm.test(\"validar texto do body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Email e/ou senha inválidos\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"teste@teste.com\",\r\n  \"password\": \"teste\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/login",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar usuários cadastrados",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"nome\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server}}/usuarios",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cadastrar usuário - sucesso",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"pm.globals.set(\"id_usuario\", response._id);\r",
+							"\r",
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.test(\"validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Cadastro realizado com sucesso\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"random_number\", _.random(1, 50))"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"teste1 software\",\r\n  \"email\": \"qateste{{random_number}}@qa.com.br\",\r\n  \"password\": \"teste\",\r\n  \"administrador\": \"true\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/usuarios",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cadastrar usuário - E-mail já cadastrado",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"pm.test(\"validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Este email já está sendo usado\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"Fulano da Silva\",\r\n  \"email\": \"qwewqeqw@qa.com.br\",\r\n  \"password\": \"teste\",\r\n  \"administrador\": \"true\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/usuarios",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar usuário por ID - sucesso",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Validar tempo de resposta 10\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(10);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/usuarios/{{id_usuario}}",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios",
+						"{{id_usuario}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar usuário por ID - ID inválido",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"pm.test(\"Validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Usuário não encontrado\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/usuarios/12321321",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios",
+						"12321321"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Excluir usuário - sucesso",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Registro excluído com sucess\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/usuarios/{{id_usuario}}",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios",
+						"{{id_usuario}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Excluir usuário - ID inválido",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Nenhum registro excluído\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/usuarios/1232132132",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios",
+						"1232132132"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Editar usuário - sucesso",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Validar body response\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Registro alterado com sucesso\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var envUrl = pm.environment.get('server');\r",
+							"pm.environment.set(\"random_number\", _.random(1, 200))\r",
+							"var randomNumber = pm.environment.get('random_number');\r",
+							"var emailUsuario = 'qateste'+randomNumber+'@qa.com.br';\r",
+							"pm.environment.set(\"email_usuario\", emailUsuario);\r",
+							"\r",
+							"const postRequest = {\r",
+							"    url: envUrl+'/usuarios',\r",
+							"    method: 'POST',\r",
+							"    header:{\r",
+							"        \"content-type\": \"application/json\"\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: 'raw',\r",
+							"        raw: JSON.stringify({nome: 'teste software',\r",
+							"        email: 'qateste'+randomNumber+'@qa.com.br',\r",
+							"        password: 'teste',\r",
+							"        administrador: 'true'})\r",
+							"    }   \r",
+							"}\r",
+							"\r",
+							"pm.sendRequest(postRequest, function (err,resp){\r",
+							"    var response = resp.json();\r",
+							"    pm.environment.set(\"id_usuario_editar_perfil\", response._id)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"nome\": \"Fulano da Silva\",\r\n  \"email\": \"{{email_usuario}}\",\r\n  \"password\": \"teste\",\r\n  \"administrador\": \"true\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/usuarios/{{id_usuario_editar_perfil}}",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"usuarios",
+						"{{id_usuario_editar_perfil}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
